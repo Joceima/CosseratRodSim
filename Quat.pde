@@ -1,39 +1,83 @@
 class Quat {
-  float w, x, y, z;
+  float w,x,y,z;
+  Quat() { w = 1; x = y = z = 0; }
+  Quat(float _w,float _x,float _y,float _z) { w=_w; x=_x; y=_y; z=_z; }
 
-  Quat(float _w, float _x, float _y, float _z) {
-    this.w = _w;
-    this.x = _x;
-    this.y = _y;
-    this.z = _z;
-  }
+  Quat copy() { return new Quat(w,x,y,z); }
 
-  Quat() {
-    this(1, 0, 0, 0); // quaternion identité
-  }
-
-  Quat copy() {
-    return new Quat(w, x, y, z);
-  }
-
-  // multiplication quaternion
-  Quat mul(Quat _q) {
+  Quat mul(Quat q) {
     return new Quat(
-      w*_q.w - x*_q.x - y*_q.y - z*_q.z,
-      w*_q.x + x*_q.w + y*_q.z - z*_q.y,
-      w*_q.y - x*_q.z + y*_q.w + z*_q.x,
-      w*_q.z + x*_q.y - y*_q.x + z*_q.w
+      w*q.w - x*q.x - y*q.y - z*q.z,
+      w*q.x + x*q.w + y*q.z - z*q.y,
+      w*q.y - x*q.z + y*q.w + z*q.x,
+      w*q.z + x*q.y - y*q.x + z*q.w
     );
   }
 
-  // rotation d'un vecteur
-  Vec3 rotate(Vec3 _v) {
-    Quat qv = new Quat(0, _v.x, _v.y, _v.z);
-    Quat r = this.mul(qv).mul(this.conjugate());
-    return new Vec3(r.x, r.y, r.z);
+  Quat conjugate() { return new Quat(w, -x, -y, -z); }
+
+  void normalize() {
+    float n = sqrt(w*w + x*x + y*y + z*z);
+    if (n < 1e-8f) { w = 1; x = y = z = 0; return; }
+    w /= n; x /= n; y /= n; z /= n;
   }
 
-  Quat conjugate() {
-    return new Quat(w, -x, -y, -z);
+  Quat normalized() {
+    Quat q = copy(); q.normalize(); return q;
+  }
+
+  // build quaternion from axis/angle (instance-style to avoid static)
+  Quat fromAxisAngle(Vec3 axis, float angle) {
+    Vec3 a = axis.normalized();
+    float half = angle * 0.5f;
+    float s = sin(half);
+    return new Quat(cos(half), a.x*s, a.y*s, a.z*s);
+  }
+
+  // instance lookAt: returns a quaternion that rotates +Z (0,0,1) to dir
+  Quat lookAt(Vec3 dir) {
+    Vec3 f = dir.normalized();
+    if (f.length() < 1e-8) return new Quat();
+    Vec3 up = new Vec3(0,1,0);
+    if (abs(f.dot(up)) > 0.999f) up = new Vec3(1,0,0);
+    Vec3 right = up.cross(f).normalized();
+    Vec3 newUp = f.cross(right);
+
+    float m00 = right.x, m01 = right.y, m02 = right.z;
+    float m10 = newUp.x, m11 = newUp.y, m12 = newUp.z;
+    float m20 = f.x, m21 = f.y, m22 = f.z;
+
+    float t = m00 + m11 + m22;
+    Quat q = new Quat();
+    if (t > 0) {
+      float s = sqrt(t + 1.0f) * 2.0f;
+      q.w = 0.25f * s;
+      q.x = (m21 - m12) / s;
+      q.y = (m02 - m20) / s;
+      q.z = (m10 - m01) / s;
+    } else {
+      // fallback: choose largest diagonal
+      if (m00 > m11 && m00 > m22) {
+        float s = sqrt(1.0f + m00 - m11 - m22) * 2.0f;
+        q.w = (m21 - m12) / s;
+        q.x = 0.25f * s;
+        q.y = (m01 + m10) / s;
+        q.z = (m02 + m20) / s;
+      } else if (m11 > m22) {
+        float s = sqrt(1.0f + m11 - m00 - m22) * 2.0f;
+        q.w = (m02 - m20) / s;
+        q.x = (m01 + m10) / s;
+        q.y = 0.25f * s;
+        q.z = (m12 + m21) / s;
+      } else {
+        float s = sqrt(1.0f + m22 - m00 - m11) * 2.0f;
+        q.w = (m10 - m01) / s;
+        q.x = (m02 + m20) / s;
+        q.y = (m12 + m21) / s;
+        q.z = 0.25f * s;
+      }
+    }
+    q.normalize();
+    return q;
   }
 }

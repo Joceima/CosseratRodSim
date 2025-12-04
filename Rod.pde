@@ -1,54 +1,92 @@
 class Rod {
-  ArrayList<Segment> segments;
+  ArrayList<Segment> segments = new ArrayList<Segment>();
 
-  Rod() {
-    segments = new ArrayList<Segment>();
+  void addSegment(int idx, Vec3 p, Quat q, Vec3 v0, float l0) {
+    segments.add(new Segment(idx, p, q, v0, l0));
   }
 
-  void addSegment(int _indice, Vec3 _p, Quat _q, Vec3 _v) {
-    segments.add(new Segment(_indice, _p, _q, _v));
-  }
-
-  void applyGravity(float h, Vec3 g)
-  {
-    // pour chaque segment : v+= g*h (sauf pinned)
-    for(Segment s : segments)
-    {
-      if(!s.pinned)
-      {
-        s.v = s.v.add(g.mul(h));
-      }
+  void pinSegment(int id) {
+    if (id >= 0 && id < segments.size()) {
+      segments.get(id).pinned = true;
+      segments.get(id).v = new Vec3(0,0,0);
     }
   }
 
-  void integrateExplicit(float h)
-  { 
-    // pour chaque segment : p += v*h (sauf pinned)
-    for(Segment s : segments)
-    {
-      if(!s.pinned)
-      {
-        s.p = s.p.add(s.v.mul(h));
-      }
+  void applyGravity(float dt, Vec3 g) {
+    for (Segment s : segments) {
+      if (!s.pinned) s.v = s.v.add(g.mul(dt));
+    }
+  }
+
+  void applyForceTo(int id, Vec3 F) {
+    if (id < 0 || id >= segments.size()) return;
+    Segment s = segments.get(id);
+    if (s.pinned) return;
+    // scale down impulse so drag isn't huge
+    s.v = s.v.add(F.mul(0.05f));
+  }
+
+  void integrateExplicit(float dt) {
+    for (Segment s : segments) {
+      if (!s.pinned) s.p = s.p.add(s.v.mul(dt));
     }
   }
 
   void applyDamping(float factor) {
-    // v *= factor
-    for(Segment s : segments)
-    {
-      s.v = s.v.mul(factor);
+    for (Segment s : segments) s.v = s.v.mul(factor);
+  }
+
+  // distance constraint between i and i+1
+  void solveDistanceConstraint(int i) {
+    Segment a = segments.get(i);
+    Segment b = segments.get(i+1);
+    Vec3 delta = b.p.sub(a.p);
+    float d = delta.length();
+    if (d < 1e-6) return;
+    float rest = a.l0;
+    float diff = (d - rest) / d;
+    Vec3 corr = delta.mul(0.5f * diff);
+    if (!a.pinned) a.p = a.p.add(corr);
+    if (!b.pinned) b.p = b.p.sub(corr);
+  }
+
+  void projectConstraints() {
+    for (int i = 0; i < segments.size()-1; i++) {
+      solveDistanceConstraint(i);
     }
   }
 
-  void pinSegment(int id) {
-    // segments.get(id).pinned = true; v = 0
-    if(id >= 0 && id <this.segments.size())
-    {
-      this.segments.get(id).pinned = true;
-      this.segments.get(id).v = new Vec3(0,0,0);
+  // orientation simple: make quaternion face next segment
+  void updateOrientationSimple() {
+    for (int i = 0; i < segments.size() - 1; i++) {
+      Segment a = segments.get(i);
+      Segment b = segments.get(i+1);
+      Vec3 dir = b.p.sub(a.p);
+      a.q = a.q.lookAt(dir); // instance method that returns a Quat
+    }
+    // last copy from previous
+    if (segments.size() > 1) {
+      segments.get(segments.size()-1).q = segments.get(segments.size()-2).q.copy();
     }
   }
 
+  // --- minimal (safe) implementations of Cosserat steps ---
+  void computeStretchShearForces() {
+    // keep minimal: store nothing (optionally compute forces)
+    for (int i = 0; i < segments.size()-1; i++) {
+      Segment a = segments.get(i);
+      Segment b = segments.get(i+1);
+      // you can compute forces here. For now we do nothing so system remains stable.
+    }
+  }
+  void applyStretchShear(float dt) { /* no-op for now */ }
 
+  void computeBendingTwistingTorques() {
+    // minimal no-op (safe)
+    for (Segment s : segments) {
+      // ensure fields exist
+      s.tau = new Vec3(0,0,0);
+    }
+  }
+  void applyBendingTwisting(float dt) { /* no-op */ }
 }

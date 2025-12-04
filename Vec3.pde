@@ -43,4 +43,12 @@ class Vec3 {
   float length() {
     return sqrt(x*x + y*y + z*z);
   }
+
+  Vec3 normalized() {
+    float len = length();
+    if (len < 1e-8) return new Vec3(0, 0, 0);
+    return new Vec3(x / len, y / len, z / len);
+  }
+
+
 }
