@@ -3,6 +3,8 @@ class Segment {
     int indice;
     Vec3 p;// position 
     Quat q; // orientation
+    Vec3 v; // vitesse
+    boolean pinned;
     //float m; // masse
     //float l0; // longueur au repos
     //float radius;
@@ -11,12 +13,13 @@ class Segment {
     //float lambda; // variable auxilière
     //float gamma; // variable auxilière intermédiaire pour rester dans la borne
 
-    Vec3 extForce;
-    Vec3 tau_ext;
+    //Vec3 extForce;
+    //Vec3 tau_ext;
 
-    Segment(int _indice, Vec3 _p, Quat _q) {
+    Segment(int _indice, Vec3 _p, Quat _q, Vec3 _v) {
         this.p = _p;
         this.q = _q;
+        this.v = _v;
     }
     //Segment(Vec3 p_, Vec3 _q, float m_, float l0_, float radius_)
     //{
@@ -32,5 +35,7 @@ class Segment {
     //    extForce = new Vec3();
     //    tau_ext = new Vec3();
     //}
+
+
 
 }

@@ -1,23 +1,34 @@
 World world;
+float dt = 0.016;
 
 void setup() {
   size(800, 600, P3D);
 
   world = new World();
 
-  // On ajoute quelques segments juste pour tester
-  for (int i = 0; i < 5; i++) {
-    world.rod.addSegment(i, new Vec3(i * 20, 0, 0), new Quat());
+  for (int i = 0; i < 10; i++) {
+    Vec3 p  = new Vec3(0, i * 20, 0);
+    Quat q  = new Quat();
+    Vec3 v0 = new Vec3(0, -0.1, 0);
+    world.rod.addSegment(i, p, q, v0);
   }
+
+  // On attache le premier segment
+  world.rod.pinSegment(0);
 
   println("Base OK");
 }
 
 void draw() {
   background(0);
-  lights();
-  translate(width/2, height/2, 0);
 
-  world.update(1.0/60.0);
-  world.draw();
+  lights();
+  translate(width/2, height/4, 0);
+
+  // Simulation
+  world.update(dt);
+
+  // Affichage
+  world.drawRod();
+  world.drawPoints();
 }
