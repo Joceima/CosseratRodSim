@@ -75,6 +75,7 @@ class Rod {
         s.p = s.p_pred.copy();
       }
     }
+    applyCosseratStretching(h);
     updateOrientationSimple();
   }
 
@@ -212,6 +213,7 @@ class Rod {
     s.q = s.q.slerp(q_new, blend);
   }
 
+  // je ne savais pas comment mettre à jour phi, donc j'ai demandé à DeepSeek de m'assister pour ce code
   void updatePhiField(int i, Vec3 v, Quat b, float lambda, float h) {
     Segment s = segments.get(i);
     float alpha = 0.01f * h; 

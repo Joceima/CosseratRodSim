@@ -19,6 +19,9 @@ class Segment {
 
   Vec3 p_pred = new Vec3(0,0,0); 
 
+  int i;
+  int j;
+
   Segment(int _indice, Vec3 _p, Quat _q, Vec3 _v, float _l0) {
     indice = _indice;
     p = _p.copy();

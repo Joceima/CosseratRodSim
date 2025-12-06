@@ -26,6 +26,7 @@ void setup() {
   println("Simulation prête !");
 }
 
+// ============================================
 void mousePressed() {
   lastX = mouseX;
   lastY = mouseY;
@@ -34,30 +35,31 @@ void mousePressed() {
 }
 
 void mouseDragged() {
-  if (grabbedId != -1) {
-    Segment s = world.rod.segments.get(grabbedId);
-    if (s.pinned) return;
-    
-    pushMatrix();
-    translate(width/2, height/4, 0);
-    rotateX(0.8);
-    
-    float dx = (mouseX - pmouseX) * 0.9f;
-    float dy = (mouseY - pmouseY) * -0.9f; 
-    
-    Vec3 move = new Vec3(dx, 0, dy); 
-    
-    popMatrix();
-    
-    s.p = s.p.add(move);
-    s.p_pred = s.p_pred.add(move);
-    
-    //println("Segment " + grabbedId + " déplacé de: " + move.x + ", " + move.z);
-  }
+  if (grabbedId == -1) return;
+  Segment s = world.rod.segments.get(grabbedId);
+  if(s.pinned) return;
+
+  Vec3 target = mouseToWorld();
+  s.p = target.copy();
+  s.p_pred = target.copy();
+}
+
+Vec3 mouseToWorld() {
+  float X = mouseX - width/2;
+  float Y = mouseY - height/4;
+
+  float cosr = cos(0.8);
+  float sinr = sin(0.8);
+
+  float wy = Y*cosr;
+  float wz = -Y*sinr;
+
+  return new Vec3(X, wy, wz);
 }
 
 
-void mouseReleased() {
+void mouseReleased() 
+{
   grabbedId = -1;
 }
 
@@ -68,7 +70,7 @@ int pickSegment() {
   rotateX(0.8);                      
 
   int nearestId = -1;
-  float minDist = 25;   // capture un peu plus large
+  float minDist = 10;   
 
   for (int i = 0; i < world.rod.segments.size(); i++) {
     Segment s = world.rod.segments.get(i);
@@ -88,9 +90,9 @@ int pickSegment() {
   return nearestId;
 }
 
+// =================================
 
 PVector worldToScreen(float x, float y, float z) {
-  // simple wrapper to Processing helpers
   return new PVector(screenX(x, y, z), screenY(x, y, z));
 }
 
@@ -98,7 +100,6 @@ void draw() {
   background(0);
   lights();
 
-  // transformation graphique (tu peux changer)
   pushMatrix();
   translate(width/2, height/4, 0);
   rotateX(0.8);
