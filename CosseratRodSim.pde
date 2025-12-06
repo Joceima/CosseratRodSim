@@ -4,12 +4,14 @@ float dt = 0.016;
 int grabbedId = -1;
 float lastX, lastY;
 
+int numberOfPoints = 20;
+
 void setup() {
   size(900, 700, P3D);
   world = new World();
 
   // --- création d'une corde simple ---
-  for (int i = 0; i < 12; i++) {
+  for (int i = 0; i < numberOfPoints; i++) {
     Vec3 p  = new Vec3(0, i * 20, 0);
     Quat q  = new Quat();
     Vec3 v0 = new Vec3(0, 0, 0);
@@ -19,6 +21,7 @@ void setup() {
   }
 
   world.rod.pinSegment(0);
+
 
   println("Simulation prête !");
 }
@@ -49,7 +52,7 @@ void mouseDragged() {
     s.p = s.p.add(move);
     s.p_pred = s.p_pred.add(move);
     
-    println("Segment " + grabbedId + " déplacé de: " + move.x + ", " + move.z);
+    //println("Segment " + grabbedId + " déplacé de: " + move.x + ", " + move.z);
   }
 }
 

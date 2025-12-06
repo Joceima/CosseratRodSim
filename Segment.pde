@@ -5,7 +5,7 @@ class Segment {
   Vec3 v;
   boolean pinned;
   float l0;
-  float k_ss = 0.1f;  // Réduit de 10.0 à 0.1
+  float k_ss = 1.3f;  // Réduit de 10.0 à 0.1
   float k_bt = 0.05f; // Réduit aussi k_bt
 
   // fields used by bending code (kept here)

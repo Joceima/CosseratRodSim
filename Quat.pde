@@ -14,9 +14,43 @@ class Quat {
     );
   }
 
+  Quat add(Quat q)
+  {
+    return new Quat(w + q.w, x + q.x, y + q.y, z + q.z);
+  }
+
+  Quat sub(Quat q)
+  {
+    return new Quat(w - q.w, x - q.x, y - q.y, z - q.z);
+  }
+
+  Quat mul(float s) {
+    return new Quat(w * s, x * s, y * s, z * s);
+  }
+
   Quat conjugate() { return new Quat(w, -x, -y, -z); }
 
-  void normalize() {
+  float normalizeFloat() 
+  {
+    float norm = sqrt(w*w + x*x + y*y + z*z);
+    if (norm > 1e-10f) {
+      w /= norm;
+      x /= norm;
+      y /= norm;
+      z /= norm;
+    } else {
+      w = 1.0f; x = 0.0f; y = 0.0f; z = 0.0f;
+    }
+    return norm;
+  }
+
+  float norm() 
+  {
+    return sqrt(w*w + x*x + y*y + z*z);
+  }
+
+  void normalize() 
+  {
     float n = sqrt(w*w + x*x + y*y + z*z);
     if (n < 1e-8f) { w = 1; x = y = z = 0; return; }
     w /= n; x /= n; y /= n; z /= n;
@@ -24,6 +58,49 @@ class Quat {
 
   Quat normalized() {
     Quat q = copy(); q.normalize(); return q;
+  }
+
+
+  Quat slerp(Quat target, float t) {
+    t = constrain(t, 0.0f, 1.0f);
+    
+    // Cosinus de l'angle entre les quaternions
+    float cosHalfTheta = w*target.w + x*target.x + y*target.y + z*target.z;
+    
+    // Si cosHalfTheta < 0, on inverse pour prendre le chemin le plus court
+    if (cosHalfTheta < 0.0f) {
+      target = target.mul(-1.0f);
+      cosHalfTheta = -cosHalfTheta;
+    }
+    
+    // Si les quaternions sont très proches, interpolation linéaire
+    if (cosHalfTheta > 0.9999f) {
+      return new Quat(
+        w + (target.w - w) * t,
+        x + (target.x - x) * t,
+        y + (target.y - y) * t,
+        z + (target.z - z) * t
+      ).normalized();
+    }
+    
+    // Sinon, SLERP
+    float halfTheta = acos(cosHalfTheta);
+    float sinHalfTheta = sqrt(1.0f - cosHalfTheta*cosHalfTheta);
+    
+    // Évite la division par zéro
+    if (abs(sinHalfTheta) < 0.001f) {
+      return this.copy();
+    }
+    
+    float ratioA = sin((1.0f - t) * halfTheta) / sinHalfTheta;
+    float ratioB = sin(t * halfTheta) / sinHalfTheta;
+    
+    return new Quat(
+      w * ratioA + target.w * ratioB,
+      x * ratioA + target.x * ratioB,
+      y * ratioA + target.y * ratioB,
+      z * ratioA + target.z * ratioB
+    );
   }
 
   // build quaternion from axis/angle (instance-style to avoid static)
