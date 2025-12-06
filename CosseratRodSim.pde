@@ -33,24 +33,23 @@ void mousePressed() {
 void mouseDragged() {
   if (grabbedId != -1) {
     Segment s = world.rod.segments.get(grabbedId);
-
+    if (s.pinned) return;
+    
     pushMatrix();
     translate(width/2, height/4, 0);
     rotateX(0.8);
-
-    float sx = screenX(s.p.x, s.p.y, s.p.z);
-    float sy = screenY(s.p.x, s.p.y, s.p.z);
-
+    
+    float dx = (mouseX - pmouseX) * 0.9f;
+    float dy = (mouseY - pmouseY) * -0.9f; 
+    
+    Vec3 move = new Vec3(dx, 0, dy); 
+    
     popMatrix();
-
-    float dx = mouseX - sx;
-    float dy = mouseY - sy;
-
-    // ---------------------------
-    Vec3 F = new Vec3(dx * 3.0f, dy * -3.0f, 0);
-
-
-    world.rod.applyForceTo(grabbedId, F);
+    
+    s.p = s.p.add(move);
+    s.p_pred = s.p_pred.add(move);
+    
+    println("Segment " + grabbedId + " déplacé de: " + move.x + ", " + move.z);
   }
 }
 

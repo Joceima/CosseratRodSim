@@ -1,3 +1,5 @@
+int substeps = 4; 
+
 class World {
   Rod rod;
 
@@ -5,31 +7,12 @@ class World {
     rod = new Rod();
   }
 
-  void update(float dt) {
-    // 1) Forces externes (gravité)
-    rod.applyGravity(dt, new Vec3(0, 200, 0));
-
-    // 2) Intégration explicite
-    rod.integrateExplicit(dt);
-
-    // 3) Contraintes (distance)
-    // itérer plusieurs fois améliore la rigidité
-    int iters = 4;
-    for (int k = 0; k < iters; k++) rod.projectConstraints();
-
-    // 4) Orientation simple (lookAt)
-    rod.updateOrientationSimple();
-
-    // 5) (optionnel) Stretch/shear forces — désactivés si tu veux
-    rod.computeStretchShearForces();
-    rod.applyStretchShear(dt);
-
-    // 6) (optionnel) Bending/twisting
-    rod.computeBendingTwistingTorques();
-    rod.applyBendingTwisting(dt);
-
-    // 7) Damping final
-    rod.applyDamping(0.98f);
+   void update(float dt) {
+    float sub_dt = dt / substeps;
+    
+    for (int i = 0; i < substeps; i++) {
+      rod.step(sub_dt);
+    }
   }
 
   void drawPoints() {
