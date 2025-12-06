@@ -1,5 +1,9 @@
 int substeps = 4; 
-
+int rows = 4;
+int cols = 4;
+float l0 = 10;
+float dx = 5;
+float dy = 5;
 class World {
   Rod rod;
 
@@ -35,4 +39,6 @@ class World {
       line(a.p.x, a.p.y, a.p.z, b.p.x, b.p.y, b.p.z);
     }
   }
+
+
 }

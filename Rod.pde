@@ -4,6 +4,15 @@ final float EPS_6 = 0.000001;
 class Rod {
   ArrayList<Segment> segments = new ArrayList<Segment>();
 
+  //Rod(int count, Vec3 origin, Vec3 dir, float l0) {
+  //  for (int i = 0; i < count; i++) {
+  //    Vec3 p = origin.add(dir.mul(i * l0));
+  //    Quat q = new Quat(1, 0, 0, 0); // Orientation par défaut
+  //    Vec3 v0 = new Vec3(0, 0, 0);
+  //    addSegment(i, p, q, v0, l0);
+  //  }
+  //}
+
   void addSegment(int idx, Vec3 p, Quat q, Vec3 v0, float l0) {
     Segment seg = new Segment(idx, p, q, v0, l0);
     seg.Q_rest = q.copy();
@@ -42,9 +51,8 @@ class Rod {
     }
   }
 
-  void step(float h) {
-    // === ÉTAPE 1: Prédiction des positions ===
-    Vec3 gravity = new Vec3(0, 2000, 0);
+  void applyGravity(float h, Vec3 gravity)
+  {
     for (Segment s : segments) {
       if (!s.pinned) {
         s.p_pred = s.p.add(s.v.mul(h));
@@ -52,13 +60,18 @@ class Rod {
         s.p_pred = s.p.copy();
         s.v = new Vec3(0, 0, 0);
       }
-    }
-    // Ajoutez gravité comme une simple force
+    }     
     for (Segment s : segments) {
       if (!s.pinned) {
         s.p_pred.y += 0.5f * gravity.y * h * h; // Formule de chute libre: y = ½gt²
       }
     }
+  }
+  void step(float h) {
+    // === ÉTAPE 1: Prédiction des positions ===
+    Vec3 gravity = new Vec3(0, 2000, 0);
+    applyGravity(h, gravity);
+    
     // === ÉTAPE 2: Résolution des contraintes sur p_pred ===
     for (int iter = 0; iter < 10; iter++) {
       for (int i = 0; i < segments.size() - 1; i++) {
@@ -75,8 +88,8 @@ class Rod {
         s.p = s.p_pred.copy();
       }
     }
-    applyCosseratStretching(h);
-    updateOrientationSimple();
+    //applyCosseratStretching(h);
+    //updateOrientationSimple();
   }
 
 
@@ -115,8 +128,8 @@ class Rod {
 
       Vec3 stretchingForce = dx.mul(-2.0f * a.k_ss / l0);
 
-      if (!a.pinned) a.p_pred = a.p_pred.add(stretchingForce.mul(0.1f * h));
-      if (!b.pinned) b.p_pred = b.p_pred.sub(stretchingForce.mul(0.1f * h));
+      if (!a.pinned) a.p_pred = a.p_pred.add(stretchingForce.mul(30.f * h));
+      if (!b.pinned) b.p_pred = b.p_pred.sub(stretchingForce.mul(30.f * h));
     }
   }
 

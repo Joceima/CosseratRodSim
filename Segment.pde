@@ -5,10 +5,9 @@ class Segment {
   Vec3 v;
   boolean pinned;
   float l0;
-  float k_ss = 1.3f;  // Réduit de 10.0 à 0.1
-  float k_bt = 0.05f; // Réduit aussi k_bt
+  float k_ss = 0.1f;  // Réduit de 10.0 à 0.1
+  float k_bt = 100f; 
 
-  // fields used by bending code (kept here)
   Vec3 tau = new Vec3(0,0,0);
   Vec3 omega = new Vec3(0,0,0);
   Quat lambda = new Quat(0,0,0,0);

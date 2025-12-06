@@ -15,7 +15,7 @@ void setup() {
     Vec3 p  = new Vec3(0, i * 20, 0);
     Quat q  = new Quat();
     Vec3 v0 = new Vec3(0, 0, 0);
-    float l0 = 20;
+    float l0 = 1;
 
     world.rod.addSegment(i, p, q, v0, l0);
   }
@@ -110,6 +110,5 @@ void draw() {
   // --- affichage ---
   world.drawRod();
   world.drawPoints();
-
   popMatrix();
 }
