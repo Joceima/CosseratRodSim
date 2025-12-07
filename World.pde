@@ -11,10 +11,11 @@ class World {
     rod = new Rod();
   }
 
-   void update(float dt) {
-    float sub_dt = dt / substeps;
+   void update() 
+  {
+    float sub_dt = DT / SUBSTEPS;
     
-    for (int i = 0; i < substeps; i++) {
+    for (int i = 0; i < SUBSTEPS; i++) {
       rod.step(sub_dt);
     }
   }

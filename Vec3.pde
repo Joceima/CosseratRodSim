@@ -27,10 +27,16 @@ class Vec3 {
     return new Vec3(x * s, y * s, z * s);
   }
 
+  Vec3 div(float s)
+  {
+    return new Vec3 (x/s, y/s, z/s);
+  }
+
 
   float dot(Vec3 v) {
     return x*v.x + y*v.y + z*v.z;
   }
+
 
   Vec3 cross(Vec3 v) {
     return new Vec3(

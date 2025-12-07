@@ -1,17 +1,14 @@
 World world;
-float dt = 0.016;
 
 int grabbedId = -1;
 float lastX, lastY;
-
-int numberOfPoints = 20;
 
 void setup() {
   size(900, 700, P3D);
   world = new World();
 
   // --- création d'une corde simple ---
-  for (int i = 0; i < numberOfPoints; i++) {
+  for (int i = 0; i < NB_OF_POINTS; i++) {
     Vec3 p  = new Vec3(0, i * 20, 0);
     Quat q  = new Quat();
     Vec3 v0 = new Vec3(0, 0, 0);
@@ -19,11 +16,7 @@ void setup() {
 
     world.rod.addSegment(i, p, q, v0, l0);
   }
-
   world.rod.pinSegment(0);
-
-
-  println("Simulation prête !");
 }
 
 // ============================================
@@ -105,7 +98,7 @@ void draw() {
   rotateX(0.8);
 
   // --- physique ---
-  world.update(dt);
+  world.update();
 
   // --- affichage ---
   world.drawRod();

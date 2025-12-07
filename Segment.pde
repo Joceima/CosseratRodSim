@@ -5,16 +5,16 @@ class Segment {
   Vec3 v;
   boolean pinned;
   float l0;
-  float k_ss = 0.1f;  // Réduit de 10.0 à 0.1
-  float k_bt = 100f; 
+  float k_ss = K_SS;  // Réduit de 10.0 à 0.1
+  float k_bt = K_BT; 
 
   Vec3 tau = new Vec3(0,0,0);
   Vec3 omega = new Vec3(0,0,0);
   Quat lambda = new Quat(0,0,0,0);
-  float gamma = 0.1;
+  float gamma = GAMMA;
 
   Quat Q_rest;
-  Quat phi = new Quat(0,0.01f,0,0);
+  Quat phi = PHI;
 
   Vec3 p_pred = new Vec3(0,0,0); 
 
