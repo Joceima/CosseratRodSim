@@ -9,6 +9,8 @@ boolean firstMousePress = false;
 // Segments parameters
 float K_SS = 0.05f; // 0.03f il faut augmenter la valeur pour un élastique très fort
 float K_BT = 10.0f;
+float STIFFNESS_FACTOR = 0.001f;
+float MAX_CORRECTION = 0.9f;
 float FACTOR_SS = 0.5f;
 float GAMMA = 0.25f;
 Quat PHI = new Quat(0, 0.01f, 0, 0);

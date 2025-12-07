@@ -78,7 +78,7 @@ class Rod {
   }
 
   void step(float h) {
-    // === ÉTAPE 1: Initialisation des positions (équation [Chen et al. 2024]) ===
+    // === ÉTAPE 1:
     // x ← x^t + hv^t + h²ä
     applyGravity(h,gravity);
     // === ÉTAPE 2: Résolution itérative (N itérations) ===
@@ -133,8 +133,8 @@ class Rod {
       Vec3 targetPos = old_p_pred.add(wolrdDirection.normalized().mul(s.l0));
       Vec3 correction = targetPos.sub(next.p_pred);
 
-      float stiffnessFactor = s.k_bt * 0.001f;
-      float maxCorrection = s.l0 * 0.9f;
+      float stiffnessFactor = s.k_bt * STIFFNESS_FACTOR;
+      float maxCorrection = s.l0 * MAX_CORRECTION;
 
       if(correction.length() > maxCorrection)
       {
