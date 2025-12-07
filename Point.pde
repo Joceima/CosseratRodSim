@@ -1,11 +1,12 @@
 class Point {
+    int id;
     Vec3 position;
     Vec3 velocity;
     Vec3 force;
     float mass;
     boolean fixed;
 
-    Point(Vec3 position, Vec3 velocity, float mass, boolean fixed)
+    Point(int id,Vec3 position, Vec3 velocity, float mass, boolean fixed)
     {
         this.position = position;
         this.velocity = velocity;

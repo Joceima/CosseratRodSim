@@ -8,7 +8,7 @@ Vec3 gravity = new Vec3(0, 3000, 0);
 
 // Simulation parameters
 float DT = 0.016;
-int NB_OF_POINTS = 10;
+int NB_OF_POINTS = 20;
 int SUBSTEPS = 4;
 
 int ROWS = 4;

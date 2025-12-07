@@ -97,6 +97,8 @@ void draw() {
   translate(width/2, height/4, 0);
   rotateX(0.8);
 
+
+  world.cloth.drawSimple();
   // --- physique ---
   world.update();
 
