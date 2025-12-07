@@ -98,7 +98,7 @@ class Rod {
         //float lambda = v.length() + b.norm();
         float lambda = iterateLambda(i, v, b);
         // Équation 18: q_i = v·e3 + λ·b
-        updateQuaternionWithBending(i, v, b, lambda);
+        updateQuaternionWithStretchingBending(i, v, b, lambda);
         segments.get(i).q.normalize();
       }
     }
@@ -152,7 +152,7 @@ class Rod {
   
 
  
-  void updateQuaternionWithBending(int i, Vec3 v, Quat b, float lambda) {
+  void updateQuaternionWithStretchingBending(int i, Vec3 v, Quat b, float lambda) {
     Segment s = segments.get(i);
     Vec3 old_p_pred = s.p_pred.copy();
     // q_i = v·e3 + λ·b
