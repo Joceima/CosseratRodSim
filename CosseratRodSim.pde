@@ -2,29 +2,178 @@ World world;
 
 int grabbedId = -1;
 float lastX, lastY;
+boolean firstMousePress = false;
+
+
+// ========== PARAMETERS ===========
+// Segments parameters
+float K_SS = 0.05f; // 0.03f il faut augmenter la valeur pour un élastique très fort
+float K_BT = 10.0f;
+float FACTOR_SS = 0.5f;
+float GAMMA = 0.25f;
+Quat PHI = new Quat(0, 0.01f, 0, 0);
+Vec3 gravity = new Vec3(0, 3000, 0);
+
+// Simulation parameters
+float DT = 0.016;
+int NB_OF_POINTS = 20;
+int SUBSTEPS = 4;
+
+float L0 = 1;
+
+float EPS_3 = 0.001;
+float EPS_6 = 0.000001;
+
+HScrollbar[] scrollbars = new HScrollbar[6];
+float[] values = {K_SS, K_BT, GAMMA, gravity.y, DT, NB_OF_POINTS};
+String[] names = {"K_SS", "K_BT", "Gamma", "Gravité", "DT", "Points"};
+float[] mins = {0.001, 0.1, 0.001, 0, 0.001, 5};
+float[] maxs = {1.0, 100.0, 1.0, 5000.0, 0.05, 50};
+
 
 void setup() {
-  size(900, 700, P3D);
+  size(1000, 700, P3D);
   world = new World();
+  
+  // Créer les scrollbars
+  createScrollbars();
+  
+  // Créer la corde
+  createRod();
+}
 
-  // --- création d'une corde simple ---
+void createRod() {
+  world.rod.segments.clear();
   for (int i = 0; i < NB_OF_POINTS; i++) {
     Vec3 p  = new Vec3(0, i * 20, 0);
     Quat q  = new Quat();
     Vec3 v0 = new Vec3(0, 0, 0);
-    float l0 = 1;
-
-    world.rod.addSegment(i, p, q, v0, l0);
+    world.rod.addSegment(i, p, q, v0, L0);
   }
   world.rod.pinSegment(0);
 }
 
-// ============================================
+void createScrollbars() {
+  int scrollbarWidth = 200;
+  int scrollbarHeight = 16;
+  int startX = 20;
+  int startY = 40;
+  int spacing = 45;
+  int loose = 16;
+  
+  for (int i = 0; i < scrollbars.length; i++) {
+    scrollbars[i] = new HScrollbar(
+      startX, 
+      startY + i * spacing, 
+      scrollbarWidth, 
+      scrollbarHeight, 
+      loose
+    );
+    
+    // Positionner le curseur selon la valeur initiale
+    float initialPos = map(values[i], mins[i], maxs[i], 0, 1);
+    scrollbars[i].setPos(initialPos);
+  }
+}
+
+void draw() {
+  background(0);
+  lights();
+  
+  // Fond pour l'interface
+  fill(30, 30, 40, 200);
+  noStroke();
+  rect(10, 10, 320, 310, 10);
+  
+  // Titre
+  fill(255, 220, 100);
+  textSize(16);
+  textAlign(LEFT, TOP);
+  text("CONTROLE DES PARAMÈTRES", 20, 20);
+  
+  // Mettre à jour et afficher les scrollbars
+  for (int i = 0; i < scrollbars.length; i++) {
+    scrollbars[i].update();
+    scrollbars[i].display();
+    
+    // Calculer la valeur
+    float pos = scrollbars[i].getPos();
+    values[i] = map(pos, 0, 1, mins[i], maxs[i]);
+    if (names[i].equals("Points")) {
+      values[i] = int(values[i]);
+    }
+    
+    // Afficher label et valeur
+    fill(180, 220, 255);
+    textSize(12);
+    textAlign(LEFT, CENTER);
+    
+    String displayValue;
+    if (names[i].equals("Points")) {
+      displayValue = str(int(values[i]));
+    } else if (values[i] >= 1000) {
+      displayValue = nf(values[i], 0, 0);
+    } else if (values[i] >= 100) {
+      displayValue = nf(values[i], 0, 0);
+    } else if (values[i] >= 10) {
+      displayValue = nf(values[i], 0, 1);
+    } else {
+      displayValue = nf(values[i], 0, 3);
+    }
+    
+    text(names[i] + ": " + displayValue, 
+         240, scrollbars[i].ypos + scrollbars[i].sheight/2);
+  }
+  
+  // Mettre à jour les paramètres de la simulation
+  updateSimulationParameters();
+  
+  pushMatrix();
+  translate(width/2, height/4, 0);
+  rotateX(0.8);
+  
+  // Simulation physique
+  world.update();
+  
+  // Affichage
+  world.drawRod();
+  world.drawPoints();
+  popMatrix();
+  
+  // Après utilisation, réinitialiser firstMousePress
+  if (firstMousePress) {
+    firstMousePress = false;
+  }
+}
+
+void updateSimulationParameters() {
+  // Mettre à jour les variables globales
+  K_SS = values[0];
+  K_BT = values[1];
+  GAMMA = values[2];
+  gravity.y = values[3];
+  DT = values[4];
+  
+  // Mettre à jour tous les segments
+  for (Segment s : world.rod.segments) {
+    s.k_ss = K_SS;
+    s.k_bt = K_BT;
+    s.gamma = GAMMA;
+  }
+  
+  // Recréer la corde si le nombre de points a changé
+  if (int(values[5]) != NB_OF_POINTS) {
+    NB_OF_POINTS = int(values[5]);
+    createRod();
+  }
+}
+
 void mousePressed() {
-  lastX = mouseX;
-  lastY = mouseY;
+  if (!firstMousePress) {
+    firstMousePress = true;
+  }
+  
   grabbedId = pickSegment();
-  println("grabbedId = " + grabbedId);
 }
 
 void mouseDragged() {
@@ -37,6 +186,11 @@ void mouseDragged() {
   s.p_pred = target.copy();
 }
 
+void mouseReleased() {
+  grabbedId = -1;
+}
+
+// ============ FONCTIONS EXISTANTES ============
 Vec3 mouseToWorld() {
   float X = mouseX - width/2;
   float Y = mouseY - height/4;
@@ -50,14 +204,7 @@ Vec3 mouseToWorld() {
   return new Vec3(X, wy, wz);
 }
 
-
-void mouseReleased() 
-{
-  grabbedId = -1;
-}
-
 int pickSegment() {
-
   pushMatrix();                      
   translate(width/2, height/4, 0);  
   rotateX(0.8);                      
@@ -81,29 +228,4 @@ int pickSegment() {
 
   popMatrix();
   return nearestId;
-}
-
-// =================================
-
-PVector worldToScreen(float x, float y, float z) {
-  return new PVector(screenX(x, y, z), screenY(x, y, z));
-}
-
-void draw() {
-  background(0);
-  lights();
-
-  pushMatrix();
-  translate(width/2, height/4, 0);
-  rotateX(0.8);
-
-
-  world.cloth.drawSimple();
-  // --- physique ---
-  world.update();
-
-  // --- affichage ---
-  world.drawRod();
-  world.drawPoints();
-  popMatrix();
 }

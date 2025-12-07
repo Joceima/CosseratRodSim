@@ -6,11 +6,10 @@ float dx = 5;
 float dy = 5;
 class World {
   Rod rod;
-  Cloth cloth;
+
 
   World() {
     rod = new Rod();
-    cloth = new Cloth(15, 15, 20.0f, 80.0f, 1.0f);
   }
 
    void update() 
@@ -21,13 +20,10 @@ class World {
       rod.step(sub_dt);
     }
 
-    for (int i = 0; i < SUBSTEPS; i++) {
-      cloth.update(sub_dt);
-    }
   }
 
 
-
+ 
   void drawPoints() {
     noStroke();
     fill(255, 180, 0);
