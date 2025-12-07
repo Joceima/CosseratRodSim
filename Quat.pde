@@ -19,6 +19,21 @@ class Quat {
     return new Quat(w + q.w, x + q.x, y + q.y, z + q.z);
   }
 
+  Vec3 mul(Vec3 v) {
+    // Multiplication d'un quaternion par un vecteur : q * v * q^-1
+    // Pour une rotation pure (q est unitaire), q^-1 = q.conjugate()
+    
+    // Convertir le vecteur en quaternion pur (w=0)
+    Quat v_quat = new Quat(0, v.x, v.y, v.z);
+    
+    // Rotation: q * v * q.conjugate()
+    Quat q_conj = conjugate();
+    Quat result = this.mul(v_quat).mul(q_conj);
+    
+    // Retourner la partie vectorielle
+    return new Vec3(result.x, result.y, result.z);
+  }
+
   Quat sub(Quat q)
   {
     return new Quat(w - q.w, x - q.x, y - q.y, z - q.z);

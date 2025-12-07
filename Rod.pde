@@ -17,11 +17,12 @@ class Rod {
   }
 
   void pinSegment(int id) {
-    if (id >= 0 && id < segments.size()) {
-      segments.get(id).pinned = true;
-      segments.get(id).v = new Vec3(0,0,0);
+      if (id >= 0 && id < segments.size()) {
+        segments.get(id).pinned = true;
+        segments.get(id).v = new Vec3(0,0,0);
+      }
     }
-  }
+
 
   void solveDistanceConstraint(int i) {
     Segment a = segments.get(i);
@@ -34,18 +35,6 @@ class Rod {
     Vec3 corr = delta.mul(0.5f * diff);
     if (!a.pinned) a.p = a.p.add(corr);
     if (!b.pinned) b.p = b.p.sub(corr);
-  }
-
-  void updateOrientationSimple() {
-    for (int i = 0; i < segments.size() - 1; i++) {
-      Segment a = segments.get(i);
-      Segment b = segments.get(i+1);
-      Vec3 dir = b.p.sub(a.p);
-      a.q = a.q.lookAt(dir); 
-    }
-    if (segments.size() > 1) {
-      segments.get(segments.size()-1).q = segments.get(segments.size()-2).q.copy();
-    }
   }
 
   void applyGravity(float h, Vec3 gravity)
@@ -75,8 +64,6 @@ class Rod {
         solveDistanceConstraintOnPredicted(i);
       }
     }
-    //applyCosseratStretching(h);
-    //applyCosseratBending(h);
 
     for(int i = 1; i < segments.size() - 1; i++)
     {
@@ -96,8 +83,6 @@ class Rod {
         s.p = s.p_pred.copy();
       }
     }
-    //applyCosseratStretching(h);
-    //updateOrientationSimple();
   }
 
 
@@ -139,6 +124,7 @@ class Rod {
     term2 = term2.mul(current.k_bt);
 
     Quat b = term1.add(term2);
+    
     return b;
 
   }
@@ -190,6 +176,7 @@ class Rod {
 
   void updateQuaternionWithBending(int i, Vec3 v, Quat b, float lambda) {
     Segment s = segments.get(i);
+    Vec3 old_p_pred = s.p_pred.copy();
     // q_i = v·e3 + λ·b
     Vec3 e3 = new Vec3(0, 0, 1);
     Vec3 ve3 = new Vec3(v.x * e3.x, v.y * e3.y, v.z * e3.z);
@@ -201,8 +188,42 @@ class Rod {
     float blend = 0.1f; 
     s.q = s.q.slerp(q_new, blend);
     //s.q = q_new;
+
+    if(i < segments.size() -1)
+    {
+      Segment next = segments.get(i+1);
+      Vec3 localDirection = new Vec3(0,0,1);
+      Vec3 wolrdDirection = rotateVectorByQuaternion(s.q, localDirection);
+      Vec3 targetPos = old_p_pred.add(wolrdDirection.normalized().mul(s.l0));
+      Vec3 correction = targetPos.sub(next.p_pred);
+
+      float stiffnessFactor = s.k_bt * 0.001f;
+      float maxCorrection = s.l0 * 0.9f;
+
+      if(correction.length() > maxCorrection)
+      {
+        correction = correction.normalized().mul(maxCorrection);
+      }
+      if (!next.pinned) {
+          next.p_pred = next.p_pred.sub(correction.mul(stiffnessFactor));
+      }
+      if( !s.pinned) {
+        s.p_pred = s.p_pred.sub(correction.mul(stiffnessFactor));
+      }
+    }
   }
 
+  Vec3 rotateVectorByQuaternion(Quat q, Vec3 v) {
+    float qw = q.w, qx = q.x, qy = q.y, qz = q.z;
+    float vx = v.x, vy = v.y, vz = v.z;
+    
+    Vec3 q_xyz = new Vec3(qx, qy, qz);
+    Vec3 cross1 = q_xyz.cross(v);
+    Vec3 temp = v.mul(qw).add(cross1);
+    Vec3 cross2 = q_xyz.cross(temp);
+    
+    return v.add(cross2.mul(2.0f));
+  }
   // je ne savais pas comment mettre à jour phi, donc j'ai demandé à DeepSeek de m'assister pour ce code
   void updatePhiField(int i, Vec3 v, Quat b, float lambda, float h) {
     Segment s = segments.get(i);

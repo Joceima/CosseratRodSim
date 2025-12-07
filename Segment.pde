@@ -21,6 +21,9 @@ class Segment {
   int i;
   int j;
 
+  Vec3 bending_correction = new Vec3(0, 0, 0);  // Correction due au bending
+  Vec3 p_without_bending = new Vec3(0, 0, 0);
+
   Segment(int _indice, Vec3 _p, Quat _q, Vec3 _v, float _l0) {
     indice = _indice;
     p = _p.copy();

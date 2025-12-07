@@ -24,21 +24,19 @@ float L0 = 1;
 float EPS_3 = 0.001;
 float EPS_6 = 0.000001;
 
-HScrollbar[] scrollbars = new HScrollbar[6];
-float[] values = {K_SS, K_BT, GAMMA, gravity.y, DT, NB_OF_POINTS};
-String[] names = {"K_SS", "K_BT", "Gamma", "Gravité", "DT", "Points"};
-float[] mins = {0.001, 0.1, 0.001, 0, 0.001, 5};
-float[] maxs = {1.0, 100.0, 1.0, 5000.0, 0.05, 50};
+HScrollbar[] scrollbars = new HScrollbar[5];
+float[] values = {K_SS, K_BT, gravity.y, DT, NB_OF_POINTS};
+String[] names = {"K_SS", "K_BT", "Gravité", "DT", "Points"};
+float[] mins = {0.001, 0.1, 0, 0.001, 5};
+float[] maxs = {1.0, 100.0, 5000.0, 0.05, 50};
 
 
 void setup() {
   size(1000, 700, P3D);
   world = new World();
   
-  // Créer les scrollbars
   createScrollbars();
-  
-  // Créer la corde
+
   createRod();
 }
 
@@ -80,30 +78,25 @@ void draw() {
   background(0);
   lights();
   
-  // Fond pour l'interface
   fill(30, 30, 40, 200);
   noStroke();
   rect(10, 10, 320, 310, 10);
   
-  // Titre
   fill(255, 220, 100);
   textSize(16);
   textAlign(LEFT, TOP);
   text("CONTROLE DES PARAMÈTRES", 20, 20);
   
-  // Mettre à jour et afficher les scrollbars
   for (int i = 0; i < scrollbars.length; i++) {
     scrollbars[i].update();
     scrollbars[i].display();
     
-    // Calculer la valeur
     float pos = scrollbars[i].getPos();
     values[i] = map(pos, 0, 1, mins[i], maxs[i]);
     if (names[i].equals("Points")) {
       values[i] = int(values[i]);
     }
     
-    // Afficher label et valeur
     fill(180, 220, 255);
     textSize(12);
     textAlign(LEFT, CENTER);
@@ -150,20 +143,18 @@ void updateSimulationParameters() {
   // Mettre à jour les variables globales
   K_SS = values[0];
   K_BT = values[1];
-  GAMMA = values[2];
-  gravity.y = values[3];
-  DT = values[4];
+  gravity.y = values[2];
+  DT = values[3];
   
   // Mettre à jour tous les segments
   for (Segment s : world.rod.segments) {
     s.k_ss = K_SS;
     s.k_bt = K_BT;
-    s.gamma = GAMMA;
   }
   
   // Recréer la corde si le nombre de points a changé
-  if (int(values[5]) != NB_OF_POINTS) {
-    NB_OF_POINTS = int(values[5]);
+  if (int(values[4]) != NB_OF_POINTS) {
+    NB_OF_POINTS = int(values[4]);
     createRod();
   }
 }
