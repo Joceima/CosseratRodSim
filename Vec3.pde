@@ -1,29 +1,35 @@
 class Vec3 {
   float x, y, z;
 
-  Vec3(float x, float y, float z) {
+  Vec3(float x, float y, float z) 
+  {
     this.x = x;
     this.y = y;
     this.z = z;
   }
 
-  Vec3() {
+  Vec3() 
+  {
     this(0, 0, 0);
   }
 
-  Vec3 copy() {
+  Vec3 copy() 
+  {
     return new Vec3(x, y, z);
   }
 
-  Vec3 add(Vec3 v) {
+  Vec3 add(Vec3 v) 
+  {
     return new Vec3(x + v.x, y + v.y, z + v.z);
   }
 
-  Vec3 sub(Vec3 v) {
+  Vec3 sub(Vec3 v) 
+  {
     return new Vec3(x - v.x, y - v.y, z - v.z);
   }
 
-  Vec3 mul(float s) {
+  Vec3 mul(float s) 
+  {
     return new Vec3(x * s, y * s, z * s);
   }
 
@@ -33,12 +39,14 @@ class Vec3 {
   }
 
 
-  float dot(Vec3 v) {
+  float dot(Vec3 v) 
+  {
     return x*v.x + y*v.y + z*v.z;
   }
 
 
-  Vec3 cross(Vec3 v) {
+  Vec3 cross(Vec3 v) 
+  {
     return new Vec3(
       y*v.z - z*v.y,
       z*v.x - x*v.z,
@@ -46,15 +54,28 @@ class Vec3 {
     );
   }
 
-  float length() {
+  float length() 
+  {
     return sqrt(x*x + y*y + z*z);
   }
 
-  Vec3 normalized() {
+  Vec3 normalized() 
+  {
     float len = length();
-    if (len < 1e-8) return new Vec3(0, 0, 0);
+    if (len < ESP_8) return new Vec3(0, 0, 0);
     return new Vec3(x / len, y / len, z / len);
   }
 
+  // Dans la classe Vec3 ou comme fonction utilitaire
+  Quat mul(Quat q) {
+    // Traiter this Vec3 comme un quaternion pur (w=0, v=(x,y,z))
+    // Multiplication de quaternions: (0, v1) * (qw, qv) = (-v1·qv, qw*v1 + v1×qv)
+
+    float w_result = -this.dot(new Vec3(q.x, q.y, q.z)); // -v1·qv
+    Vec3 v_result = new Vec3(q.w * this.x, q.w * this.y, q.w * this.z)  // qw*v1
+                    .add(this.cross(new Vec3(q.x, q.y, q.z))); // + v1×qv
+
+    return new Quat(w_result, v_result.x, v_result.y, v_result.z);
+  }
 
 }

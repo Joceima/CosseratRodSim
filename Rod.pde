@@ -83,7 +83,7 @@ class Rod {
     applyGravity(h,gravity);
     // === ÉTAPE 2: Résolution itérative (N itérations) ===
     for (int iter = 0; iter < 5; iter++) {
-      // --- PARTIE A: Mise à jour des positions via VBD ---
+      // --- PARTIE A: Mise à jour des positions---
       for (int i = 0; i < segments.size() - 1; i++) {
         solveDistanceConstraintOnPredicted(i);
       }
@@ -95,7 +95,8 @@ class Rod {
         Quat b = computeBendingEffectAtPoint(i);
         
         // Équation 22: λ = |v| + |b|
-        float lambda = v.length() + b.norm();
+        //float lambda = v.length() + b.norm();
+        float lambda = iterateLambda(i, v, b);
         // Équation 18: q_i = v·e3 + λ·b
         updateQuaternionWithBending(i, v, b, lambda);
         segments.get(i).q.normalize();
@@ -110,17 +111,57 @@ class Rod {
       }
     }
   }
+
+  float iterateLambda(int i, Vec3 v, Quat b)
+  {
+    if(i < 0 || i >= segments.size())
+    {
+      return 0.0f;
+    }
+    Segment seg = segments.get(i);
+    float v_norm = v.length();
+    float b_norm = b.norm();
+    float gamma_clamped = constrain(seg.gamma, 1e-3f, 1.0f);
+    float lambda = v_norm + gamma_clamped * b_norm;
+    Quat q_v_dot_e3 = new Quat(0, 0, 0, v.z);
+    
+    // 𝜆·b
+    Quat q_lambda_b = b.mul(lambda);
+    
+    // v·e3 + 𝜆·b
+    Quat sum = q_v_dot_e3.add(q_lambda_b);
+    
+    // |v·e3 + 𝜆·b|
+    float sum_norm = sum.norm();
+    
+    // |v|²
+    float v_norm_squared = v_norm * v_norm;
+    
+    // Équation 25: 𝜆 = sqrt(|v·e3 + 𝜆·b| + |v|²)
+    lambda = sqrt(sum_norm + v_norm_squared);
+     if (b_norm > 1e-6f) {
+        seg.gamma = (lambda - v_norm) / b_norm;
+        // Clamp gamma pour la prochaine itération
+        seg.gamma = constrain(seg.gamma, 1e-3f, 1.0f);
+    } else {
+        seg.gamma = 0.1f; // Valeur par défaut si b est trop petit
+    }
+    
+    return lambda;
+  }
   
+
+ 
   void updateQuaternionWithBending(int i, Vec3 v, Quat b, float lambda) {
     Segment s = segments.get(i);
     Vec3 old_p_pred = s.p_pred.copy();
     // q_i = v·e3 + λ·b
     Vec3 e3 = new Vec3(0, 0, 1);
-    Vec3 ve3 = new Vec3(v.x * e3.x, v.y * e3.y, v.z * e3.z);
-    Quat q_ve3 = new Quat(0, ve3.x, ve3.y, ve3.z);
+    Vec3 ve3 = v.cross(e3);
+    Quat vbe3 = ve3.mul(b);
     // λ·b
-    Quat q_lambda_b = b.mul(lambda);
-    Quat q_new = q_ve3.add(q_lambda_b);
+    Quat lambda_b = b.mul(lambda);
+    Quat q_new = vbe3.add(lambda_b);
     q_new.normalize();
     float blend = 0.1f; 
     s.q = s.q.slerp(q_new, blend);
@@ -149,9 +190,9 @@ class Rod {
     }
   }
 
-  Vec3 rotateVectorByQuaternion(Quat q, Vec3 v) {
+  Vec3 rotateVectorByQuaternion(Quat q, Vec3 v) 
+  {
     float qw = q.w, qx = q.x, qy = q.y, qz = q.z;
-    float vx = v.x, vy = v.y, vz = v.z;
     Vec3 q_xyz = new Vec3(qx, qy, qz);
     Vec3 cross1 = q_xyz.cross(v);
     Vec3 temp = v.mul(qw).add(cross1);

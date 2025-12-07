@@ -6,25 +6,21 @@ float dx = 5;
 float dy = 5;
 class World {
   Rod rod;
-
-
-  World() {
+  World() 
+  {
     rod = new Rod();
   }
-
-   void update() 
+  void update() 
   {
     float sub_dt = DT / SUBSTEPS;
     
     for (int i = 0; i < SUBSTEPS  ; i++) {
       rod.step(sub_dt);
     }
-
   }
-
-
  
-  void drawPoints() {
+  void drawPoints() 
+  {
     noStroke();
     fill(255, 180, 0);
     for (Segment s : rod.segments) {
@@ -35,7 +31,8 @@ class World {
     }
   }
 
-  void drawRod() {
+  void drawRod() 
+  {
     stroke(255);
     strokeWeight(3);
     for (int i = 0; i < rod.segments.size() - 1; i++) {
@@ -44,6 +41,4 @@ class World {
       line(a.p.x, a.p.y, a.p.z, b.p.x, b.p.y, b.p.z);
     }
   }
-
-
 }

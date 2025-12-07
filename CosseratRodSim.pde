@@ -25,6 +25,7 @@ float L0 = 0.1;
 
 float EPS_3 = 0.001;
 float EPS_6 = 0.000001;
+float ESP_8 = 0.00000001;
 
 HScrollbar[] scrollbars = new HScrollbar[5];
 float[] values = {K_SS, K_BT, gravity.y, DT, NB_OF_POINTS};
