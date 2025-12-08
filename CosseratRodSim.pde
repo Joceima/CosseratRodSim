@@ -13,7 +13,6 @@ float STIFFNESS_FACTOR = 0.001f;
 float MAX_CORRECTION = 0.9f;
 float FACTOR_SS = 1f;
 float GAMMA = 0.25f;
-Quat PHI = new Quat(0, 0.01f, 0, 0);
 Vec3 gravity = new Vec3(0, 30, 0);
 
 // Simulation parameters
