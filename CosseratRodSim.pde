@@ -7,11 +7,11 @@ boolean firstMousePress = false;
 
 // ========== PARAMETERS ===========
 // Segments parameters
-float K_SS = 0.05f; // 0.03f il faut augmenter la valeur pour un élastique très fort
+float K_SS = 0.05f; // 0.03f 
 float K_BT = 10.0f;
 float STIFFNESS_FACTOR = 0.001f;
 float MAX_CORRECTION = 0.9f;
-float FACTOR_SS = 0.5f;
+float FACTOR_SS = 1f;
 float GAMMA = 0.25f;
 Quat PHI = new Quat(0, 0.01f, 0, 0);
 Vec3 gravity = new Vec3(0, 30, 0);
@@ -71,7 +71,6 @@ void createScrollbars() {
       loose
     );
     
-    // Positionner le curseur selon la valeur initiale
     float initialPos = map(values[i], mins[i], maxs[i], 0, 1);
     scrollbars[i].setPos(initialPos);
   }
@@ -143,19 +142,16 @@ void draw() {
 }
 
 void updateSimulationParameters() {
-  // Mettre à jour les variables globales
   K_SS = values[0];
   K_BT = values[1];
   gravity.y = values[2];
   DT = values[3];
   
-  // Mettre à jour tous les segments
   for (Segment s : world.rod.segments) {
     s.k_ss = K_SS;
     s.k_bt = K_BT;
   }
   
-  // Recréer la corde si le nombre de points a changé
   if (int(values[4]) != NB_OF_POINTS) {
     NB_OF_POINTS = int(values[4]);
     createRod();
@@ -184,7 +180,7 @@ void mouseReleased() {
   grabbedId = -1;
 }
 
-// ============ FONCTIONS EXISTANTES ============
+// ========================
 Vec3 mouseToWorld() {
   float X = mouseX - width/2;
   float Y = mouseY - height/4;

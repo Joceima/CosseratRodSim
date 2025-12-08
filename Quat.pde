@@ -70,18 +70,17 @@ class Quat {
   }
 
 
+  // deepseek
   Quat slerp(Quat target, float t) {
     t = constrain(t, 0.0f, 1.0f);
     
     // Cosinus de l'angle entre les quaternions
     float cosHalfTheta = w*target.w + x*target.x + y*target.y + z*target.z;
-    
     // Si cosHalfTheta < 0, on inverse pour prendre le chemin le plus court
     if (cosHalfTheta < 0.0f) {
       target = target.mul(-1.0f);
       cosHalfTheta = -cosHalfTheta;
     }
-    
     // Si les quaternions sont très proches, interpolation linéaire
     if (cosHalfTheta > 0.9999f) {
       return new Quat(
@@ -112,7 +111,7 @@ class Quat {
     );
   }
 
-  // build quaternion from axis/angle (instance-style to avoid static)
+  // deep-seek
   Quat fromAxisAngle(Vec3 axis, float angle) {
     Vec3 a = axis.normalized();
     float half = angle * 0.5f;
@@ -120,7 +119,7 @@ class Quat {
     return new Quat(cos(half), a.x*s, a.y*s, a.z*s);
   }
 
-  // instance lookAt: returns a quaternion that rotates +Z (0,0,1) to dir
+  // deep-seek
   Quat lookAt(Vec3 dir) {
     Vec3 f = dir.normalized();
     if (f.length() < 1e-8) return new Quat();

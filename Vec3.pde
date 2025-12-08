@@ -66,11 +66,7 @@ class Vec3 {
     return new Vec3(x / len, y / len, z / len);
   }
 
-  // Dans la classe Vec3 ou comme fonction utilitaire
   Quat mul(Quat q) {
-    // Traiter this Vec3 comme un quaternion pur (w=0, v=(x,y,z))
-    // Multiplication de quaternions: (0, v1) * (qw, qv) = (-v1·qv, qw*v1 + v1×qv)
-
     float w_result = -this.dot(new Vec3(q.x, q.y, q.z)); // -v1·qv
     Vec3 v_result = new Vec3(q.w * this.x, q.w * this.y, q.w * this.z)  // qw*v1
                     .add(this.cross(new Vec3(q.x, q.y, q.z))); // + v1×qv

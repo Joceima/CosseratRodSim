@@ -1,9 +1,5 @@
 int substeps = 4; 
-int rows = 4;
-int cols = 4;
-float l0 = 1;
-float dx = 5;
-float dy = 5;
+
 class World {
   Rod rod;
   World() 
