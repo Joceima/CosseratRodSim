@@ -14,7 +14,7 @@ float MAX_CORRECTION = 0.9f;
 float FACTOR_SS = 0.5f;
 float GAMMA = 0.25f;
 Quat PHI = new Quat(0, 0.01f, 0, 0);
-Vec3 gravity = new Vec3(0, 3000, 0);
+Vec3 gravity = new Vec3(0, 30, 0);
 
 // Simulation parameters
 float DT = 0.016;
