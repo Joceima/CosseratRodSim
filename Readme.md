@@ -14,6 +14,9 @@ Le code principale à lancer est CosseratRodSim.pde. Il y a aura une corde d'aff
 - HScrollbar : outils pour l'interface de slider pour changer les paramètres.
 - CosseratRodSim : code principale, permettant à chaque pas de temps d'appeller ```rod.step(dt)```, également d'afficher l'interface et de mettre à jour les différents paramètres. 
 
+
+# Référence
+
 ```@inproceedings{Hsu2025,
     author = {Jerry Hsu, Tongtong Wang, Kui Wu, and Cem Yuksel},
     title = {Stable Cosserat Rods},
