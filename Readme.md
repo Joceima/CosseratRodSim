@@ -3,17 +3,16 @@ Mini projet dans le cadre de l'UE Modélisation et animation, partie B. Crespin.
 
 # Description
 Voici une implémentation simple de l'article "Stable Cosserat Rod".
-Le code principale à lancer est CosseratRodSim.pde. Il y a aura une corde d'afficher et une petite inferface permettant de changer les coefficients k_ss ("stretching" et "shearing"), k_bt ("bending" et "twisting"), la gravité, DT (le pas de temps) et le nombre de points d'une corde. 
+Le code principal à lancer est CosseratRodSim.pde. Il y a aura une corde d'afficher et une petite interface permettant de changer les coefficients k_ss ("stretching" et "shearing"), k_bt ("bending" et "twisting"), la gravité, DT (le pas de temps) et le nombre de points d'une corde. 
 
 # Classes
 - Vec3 : opérateurs sur des vecteurs 3D
 - Quat : opérateurs sur des quaternions
-- Segment : une corde est composée de plusieurs segments. Définitions des différents paramètres importantes pour la simulation.
-- Rod : liste de segments. Contient les deux algorithmes principaux du papier "Stable Cosserat Rod".
-- World : permet d'initialiser la corde. COntient les algorithmes de dessins des points et segments. 
+- Segment : une corde est composée de plusieurs segments. Définitions des différents paramètres importants pour la simulation.
+- Rod : liste de segments. Elle contient les deux algorithmes principaux du papier "Stable Cosserat Rod".
+- World : permet d'initialiser la corde. Elle contient les algorithmes permettant de dessiner des points et des segments. 
 - HScrollbar : outils pour l'interface de slider pour changer les paramètres.
-- CosseratRodSim : code principale, permettant à chaque pas de temps d'appeller ```rod.step(dt)```, également d'afficher l'interface et de mettre à jour les différents paramètres. 
-
+- CosseratRodSim : code principal, permettant à chaque pas de temps d'appeler ```rod.step(dt)```, également d'afficher l'interface et de mettre à jour les différents paramètres. 
 
 # Référence
 
@@ -30,4 +29,4 @@ Le code principale à lancer est CosseratRodSim.pde. Il y a aura une corde d'aff
     keywords = {Cosserat Rods, Thin Elastic Rods},
     location = {Vancouver, BC, Canada},
     series = {SIGGRAPH ’25}
-} ```
+}```
