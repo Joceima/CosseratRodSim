@@ -21,7 +21,7 @@ float DT = 0.016;
 int NB_OF_POINTS = 20;
 int SUBSTEPS = 4;
 
-float L0 = 0.1;
+float L0 = 10;
 
 float EPS_3 = 0.001;
 float EPS_6 = 0.000001;

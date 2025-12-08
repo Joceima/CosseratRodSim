@@ -54,28 +54,51 @@ class Rod {
     }
   }
 
+  //void solveDistanceConstraintOnPredicted(int i) {
+  //  Segment a = segments.get(i);
+  //  Segment b = segments.get(i+1);
+  //  
+  //  if (a.pinned && b.pinned) return;
+  //  
+  //  Vec3 delta = b.p_pred.sub(a.p_pred);
+  //  float d = delta.length();
+  //  if (d < 1e-6) return;
+  //  
+  //  float rest = a.l0;
+  //  float diff = (d - rest) / d;
+  //  
+  //  float resistance = a.k_ss * 0.1f;  
+  //  float correctionFactor = diff * resistance;
+  //  correctionFactor = constrain(correctionFactor, -0.5f, 0.5f);
+  //
+  //  Vec3 corr = delta.mul(0.5f * correctionFactor);
+  //  
+  //  if (!a.pinned) a.p_pred = a.p_pred.add(corr);
+  //  if (!b.pinned) b.p_pred = b.p_pred.sub(corr);
+  //}
+
   void solveDistanceConstraintOnPredicted(int i) {
     Segment a = segments.get(i);
     Segment b = segments.get(i+1);
-    
-    if (a.pinned && b.pinned) return;
-    
+
     Vec3 delta = b.p_pred.sub(a.p_pred);
     float d = delta.length();
-    if (d < 1e-6) return;
-    
     float rest = a.l0;
+
     float diff = (d - rest) / d;
-    
-    float resistance = a.k_ss * 0.1f;  
-    float correctionFactor = diff * resistance;
-    correctionFactor = constrain(correctionFactor, -0.5f, 0.5f);
-  
-    Vec3 corr = delta.mul(0.5f * correctionFactor);
-    
-    if (!a.pinned) a.p_pred = a.p_pred.add(corr);
-    if (!b.pinned) b.p_pred = b.p_pred.sub(corr);
+
+    if (!a.pinned) a.p_pred = a.p_pred.add(delta.mul(0.5f * diff));
+    if (!b.pinned) b.p_pred = b.p_pred.sub(delta.mul(0.5f * diff));
   }
+
+
+  void predictPositions(float h) {
+    for (Segment s : segments) {
+      if (!s.pinned) s.p_pred = s.p.add(s.v.mul(h));
+      else s.p_pred = s.p.copy();
+    }
+  }
+
 
   void step(float h) {
     // === ÉTAPE 1:
@@ -84,9 +107,14 @@ class Rod {
     // === ÉTAPE 2: Résolution itérative (N itérations) ===
     for (int iter = 0; iter < 5; iter++) {
       // --- PARTIE A: Mise à jour des positions---
-      for (int i = 0; i < segments.size() - 1; i++) {
+      //le problème est que cette fonction écrase en partie les modifications 
+      //apportés par computeStretchingEffectAtPOint()
+      // ce qu'il aurait fallait faire trouver la formule pour calculer 
+      // les gradients v et b avant de mettre à jour les quaternions 
+      for (int i = 0; i < segments.size() - 1; i++) { 
         solveDistanceConstraintOnPredicted(i);
       }
+      //predictPositions(h);
       // --- PARTIE B: Mise à jour des orientations ---
       for (int i = 1; i < segments.size() - 1; i++) {
         // Équation 15: v = -2·k_i^{SS}·(1/l₀)·(x_{i+1} - x_i)
